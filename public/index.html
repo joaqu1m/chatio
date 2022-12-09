@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+    <title>chatTesting</title>
+</head>
+<body>
+    <div id="telaChat" class="menu">
+        <div id="caixote"></div>
+        <div id="botoes">
+            <input type="text" id="telaChatTexto" placeholder="escreva sua mensagem">
+            <br>
+            <button onclick="mudarNome(true)" id="telaChatBotaoMudarNome">mudar nome</button>
+        </div>
+    </div>
+    <div id="telaMudarNome" class="menu" style="display: none;">
+        <div>
+            <input type="text" placeholder="novo nome" id="telaMudarNomeNewName">
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    var ultimoIdProcurado = 0
+
+    if (localStorage.nome != undefined) {
+        telaMudarNomeNewName.value = localStorage.nome
+    } else {
+        telaChatBotaoMudarNome.innerHTML = "criar nome"
+    }
+
+    telaChatTexto.addEventListener("keydown", function(resposta) {
+        if (resposta.key == "Enter") {
+            resposta.preventDefault()
+            mandarMensagem()
+        }
+    })
+
+    telaMudarNomeNewName.addEventListener("keydown", function(resposta) {
+        if (resposta.key == "Enter") {
+            resposta.preventDefault()
+            mudarNome(false)
+        }
+    })
+
+    //Funções do banco
+
+    fetch("/chat/buscarUltimoId", {
+        method: "GET"
+    })
+    .then(function (response) {
+        if (response.ok) {
+            response.json().then(function (resposta) {
+                ultimoIdProcurado = resposta[0].id
+                setInterval(buscarNovasMensagens, 500)
+            })
+        }
+    })
+
+    function buscarNovasMensagens() {
+        fetch(`/chat/buscarNovasMensagens/${ultimoIdProcurado}`, {
+            method: "GET"
+        })
+        .then(function (response) {
+            if (response.ok && response.statusText != "No Content") {
+                response.json().then(function (resposta) {
+                    resposta = resposta.reverse()
+                    ultimoIdProcurado = resposta[resposta.length-1].idMensagem
+                    for (i = 0; i < resposta.length; i ++) {
+                        caixote.innerHTML += `<div class="mensagem"><b>${resposta[i].dono} diz:</b><br>${resposta[i].texto}</div>`
+                        caixote.scrollTop = caixote.scrollHeight
+                    }
+                })
+            }
+        })
+    }
+
+    function mudarNome(solicitando) {
+        if (solicitando) {
+            telaChat.style.display = 'none'
+            telaMudarNome.style.display = 'flex'
+        } else {
+            if (telaMudarNomeNewName.value.indexOf("<") > -1 || telaMudarNomeNewName.value.indexOf(">") > -1) {
+                alert('infelizmente símbolos como esse "<" e esse ">" são banidos do meu sistema :(')
+                return
+            }
+            if (telaMudarNomeNewName.value == '') {
+                alert('coloca um nome rapaz')
+                return
+            }
+            if (telaMudarNomeNewName.value.length > 16) {
+                alert('nome muito grande')
+                return
+            }
+            localStorage.nome = telaMudarNomeNewName.value
+            telaChatBotaoMudarNome.innerHTML = "mudar nome"
+            telaMudarNome.style.display = 'none'
+            telaChat.style.display = 'flex'
+        }
+    }
+
+    function mandarMensagem() {
+        if (localStorage.nome == undefined) {
+            alert('defina um nome de perfil e tente novamente')
+            mudarNome(true)
+            return
+        }
+        if (telaChatTexto.value.indexOf("<") > -1 || telaChatTexto.value.indexOf(">") > -1) {
+            alert('infelizmente símbolos como esse "<" e esse ">" são banidos do meu sistema :(')
+            return
+        }
+        if (telaChatTexto.value == "") {
+            alert('manda algo vacilão')
+            return
+        }
+        if (telaChatTexto.value.length > 512) {
+            alert('mensagem muito grande')
+            return
+        }
+
+        fetch("/chat/mandarMensagem", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                nome: localStorage.nome,
+                texto: telaChatTexto.value
+            })
+        })
+        .then(function (response) {
+            if (response.ok) {
+                response.json().then(function (resposta) {
+                    telaChatTexto.value = ""
+                    if (resposta != null) {
+                        console.log("Inserido com sucesso")
+                    }
+                })
+            }
+        })
+    }
+</script>

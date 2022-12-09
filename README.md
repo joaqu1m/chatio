@@ -1,2 +1,2 @@
 # chatio
-Tentando fazer um chatzinho com node
+Tentando fazer um chatzinho com Node.js
