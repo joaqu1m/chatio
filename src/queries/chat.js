@@ -48,11 +48,36 @@ router.get("/buscarUltimoId", function (req, res) {
         }
     )
 })
+
 router.get("/buscarNovasMensagens/:valores", function (req, res) {
 
     var instrucao =
     `
     select * from mensagem where idMensagem > ${req.params.valores};
+    `
+    console.log("Executando a instrução SQL: \n" + instrucao)
+    database.executar(instrucao)
+    .then(
+        function (resultado) {
+        if (resultado.length > 0) {
+            res.status(200).json(resultado)
+        } else {
+            res.status(204).send("Nenhum resultado encontrado!")
+        }
+    }).catch(
+        function (erro) {
+            console.log(erro)
+            console.log("Houve um erro ao realizar a consulta! Erro: ", erro.sqlMessage)
+            res.status(500).json(erro.sqlMessage)
+        }
+    )
+})
+
+router.get("/deletarMensagensAntigas/:valores", function (req, res) {
+    console.log("ta deletando???")
+    var instrucao =
+    `
+    delete from mensagem where idMensagem < ${req.params.valores - 49};
     `
     console.log("Executando a instrução SQL: \n" + instrucao)
     database.executar(instrucao)

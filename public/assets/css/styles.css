@@ -12,17 +12,46 @@ body {
     align-items: center;
 }
 
-#caixote {
-    width: 60vw;
-    height: 60vh;
+.chat {
+    width: 30vw;
+    height: 30vh;
+    min-width: 200px;
+    min-height: 150px;
+    position: fixed;
+    right: 0;
+    bottom: 0;
     background-color: white;
-    border: 1px solid black;
+    font-family: 'Trebuchet MS';
+}
+
+#caixote {
+    width: 100%;
+    height: 90%;
     overflow-y: scroll;
 }
 
 .mensagem {
     max-width: 100%;
     overflow-wrap: break-word;
+}
+
+#areaInput {
+    width: 100%;
+    height: 10%;
+    display: flex;
+}
+
+#areaInput div {
+    height: 100%;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+#telaChatTexto {
+    height: 100%;
+    width: 90%;
+    padding: 0;
+    border: 1px solid black;
 }
 
 #botoes {

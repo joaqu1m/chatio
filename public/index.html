@@ -4,27 +4,34 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="./assets/js/utilities.js"></script>
     <link rel="stylesheet" href="./assets/css/styles.css">
     <title>chatTesting</title>
 </head>
 <body>
-    <div id="telaChat" class="menu">
+    <div class="chat">
         <div id="caixote"></div>
+        <div id="areaInput">
+            <input type="text" id="telaChatTexto" placeholder="Digite sua mensagem aqui..." maxlength="512">
+            <div><img src="./assets/imgs/715vwvP5ZEL.png" height="100%"></div>
+            <div onclick="mandarMensagem()"><img src="./assets/imgs/send-message-2-2.png" height="100%"></div>
+        </div>
+    </div>
+    <div id="telaChat" class="menu">
         <div id="botoes">
-            <input type="text" id="telaChatTexto" placeholder="escreva sua mensagem">
-            <br>
             <button onclick="mudarNome(true)" id="telaChatBotaoMudarNome">mudar nome</button>
         </div>
     </div>
     <div id="telaMudarNome" class="menu" style="display: none;">
         <div>
-            <input type="text" placeholder="novo nome" id="telaMudarNomeNewName">
+            <input type="text" placeholder="novo nome" id="telaMudarNomeNewName" maxlength="16">
         </div>
     </div>
 </body>
 </html>
 <script>
     var ultimoIdProcurado = 0
+    var nomeAtual = ""
 
     if (localStorage.nome != undefined) {
         telaMudarNomeNewName.value = localStorage.nome
@@ -56,6 +63,7 @@
             response.json().then(function (resposta) {
                 ultimoIdProcurado = resposta[0].id
                 setInterval(buscarNovasMensagens, 500)
+                setInterval(deletarMensagensAntigas, 30000)
             })
         }
     })
@@ -70,9 +78,27 @@
                     resposta = resposta.reverse()
                     ultimoIdProcurado = resposta[resposta.length-1].idMensagem
                     for (i = 0; i < resposta.length; i ++) {
-                        caixote.innerHTML += `<div class="mensagem"><b>${resposta[i].dono} diz:</b><br>${resposta[i].texto}</div>`
+                        if (resposta[i].dono == nomeAtual) {
+                            caixote.innerHTML += `<div class="mensagem">${resposta[i].texto}</div>`
+                        } else {
+                            caixote.innerHTML += `<div class="mensagem"><b style="font-size: 75%;">${resposta[i].dono} diz:</b><br>${resposta[i].texto}</div>`
+                        }
+                        nomeAtual = resposta[i].dono
                         caixote.scrollTop = caixote.scrollHeight
                     }
+                })
+            }
+        })
+    }
+
+    function deletarMensagensAntigas() {
+        fetch(`/chat/deletarMensagensAntigas/${ultimoIdProcurado}`, {
+            method: "GET"
+        })
+        .then(function (response) {
+            if (response.ok && response.statusText != "No Content") {
+                response.json().then(function (resposta) {
+                    console.log(resposta)
                 })
             }
         })
@@ -83,19 +109,12 @@
             telaChat.style.display = 'none'
             telaMudarNome.style.display = 'flex'
         } else {
-            if (telaMudarNomeNewName.value.indexOf("<") > -1 || telaMudarNomeNewName.value.indexOf(">") > -1) {
-                alert('infelizmente símbolos como esse "<" e esse ">" são banidos do meu sistema :(')
-                return
-            }
             if (telaMudarNomeNewName.value == '') {
                 alert('coloca um nome rapaz')
                 return
             }
-            if (telaMudarNomeNewName.value.length > 16) {
-                alert('nome muito grande')
-                return
-            }
-            localStorage.nome = telaMudarNomeNewName.value
+
+            localStorage.nome = trocarCaractere(trocarCaractere(trocarCaractere(telaMudarNomeNewName.value, "  ", ""), "<", ""), ">", "").trim()
             telaChatBotaoMudarNome.innerHTML = "mudar nome"
             telaMudarNome.style.display = 'none'
             telaChat.style.display = 'flex'
@@ -108,16 +127,8 @@
             mudarNome(true)
             return
         }
-        if (telaChatTexto.value.indexOf("<") > -1 || telaChatTexto.value.indexOf(">") > -1) {
-            alert('infelizmente símbolos como esse "<" e esse ">" são banidos do meu sistema :(')
-            return
-        }
         if (telaChatTexto.value == "") {
             alert('manda algo vacilão')
-            return
-        }
-        if (telaChatTexto.value.length > 512) {
-            alert('mensagem muito grande')
             return
         }
 
@@ -128,7 +139,7 @@
             },
             body: JSON.stringify({
                 nome: localStorage.nome,
-                texto: telaChatTexto.value
+                texto: trocarCaractere(trocarCaractere(trocarCaractere(telaChatTexto.value, "  ", " "), "<", ""), ">", "").trim()
             })
         })
         .then(function (response) {
@@ -136,7 +147,7 @@
                 response.json().then(function (resposta) {
                     telaChatTexto.value = ""
                     if (resposta != null) {
-                        console.log("Inserido com sucesso")
+                        console.log("Mensagem enviada com sucesso")
                     }
                 })
             }
