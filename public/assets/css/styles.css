@@ -12,21 +12,23 @@ body {
     align-items: center;
 }
 
-.chat {
+#chat {
     width: 30vw;
-    height: 30vh;
+    height: 35vh;
     min-width: 200px;
-    min-height: 150px;
+    min-height: 0;
     position: fixed;
     right: 0;
     bottom: 0;
     background-color: white;
     font-family: 'Trebuchet MS';
+    border-top-left-radius: 20px;
+    display: none;
 }
 
 #caixote {
     width: 100%;
-    height: 90%;
+    height: 80%;
     overflow-y: scroll;
 }
 
@@ -35,13 +37,13 @@ body {
     overflow-wrap: break-word;
 }
 
-#areaInput {
+.areaInput {
     width: 100%;
     height: 10%;
     display: flex;
 }
 
-#areaInput div {
+.areaInput div {
     height: 100%;
     border: 1px solid black;
     cursor: pointer;
@@ -54,8 +56,8 @@ body {
     border: 1px solid black;
 }
 
-#botoes {
-    display: flex;
+.formulario {
+    display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;

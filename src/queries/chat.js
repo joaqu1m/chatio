@@ -5,7 +5,7 @@ var database = require("./../database/conexao")
 router.post("/mandarMensagem", function (req, res) {
     var instrucao =
     `
-    insert into mensagem (dono, texto) values ('${req.body.nome}', '${req.body.texto}');
+    insert into userMensagem (texto) values ('${req.body.texto}');
     `
 
     console.log("Executando a instrução SQL: \n" + instrucao)
@@ -29,7 +29,7 @@ router.post("/mandarMensagem", function (req, res) {
 router.get("/buscarUltimoId", function (req, res) {
     var instrucao =
     `
-    select max(idMensagem) as id from mensagem;
+    select max(idMensagem) as id from userMensagem;
     `
     console.log("Executando a instrução SQL: \n" + instrucao)
     database.executar(instrucao)
@@ -53,7 +53,7 @@ router.get("/buscarNovasMensagens/:valores", function (req, res) {
 
     var instrucao =
     `
-    select * from mensagem where idMensagem > ${req.params.valores};
+    select * from userMensagem where idMensagem > ${req.params.valores};
     `
     console.log("Executando a instrução SQL: \n" + instrucao)
     database.executar(instrucao)
@@ -74,10 +74,10 @@ router.get("/buscarNovasMensagens/:valores", function (req, res) {
 })
 
 router.get("/deletarMensagensAntigas/:valores", function (req, res) {
-    console.log("ta deletando???")
+    
     var instrucao =
     `
-    delete from mensagem where idMensagem < ${req.params.valores - 49};
+    delete from userMensagem where idMensagem < ${req.params.valores - 49};
     `
     console.log("Executando a instrução SQL: \n" + instrucao)
     database.executar(instrucao)

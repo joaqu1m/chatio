@@ -9,34 +9,60 @@
     <title>chatTesting</title>
 </head>
 <body>
-    <div class="chat">
+    <div id="chat">
+        <div class="areaInput" style="background-color: rgb(223, 223, 223); border-top-left-radius: 20px;">
+            <div id="chatBotaoAbrirChat" onclick="abrirChat(false)" style="margin-left: 93%; border: 0;"><img src="./assets/imgs/715vwvP5ZEL.png" height="100%"></div>
+        </div>
         <div id="caixote"></div>
-        <div id="areaInput">
-            <input type="text" id="telaChatTexto" placeholder="Digite sua mensagem aqui..." maxlength="512">
-            <div><img src="./assets/imgs/715vwvP5ZEL.png" height="100%"></div>
+        <div class="areaInput">
+            <input type="text" id="telaChatTexto" placeholder="Digite sua mensagem aqui..." maxlength="512" autocomplete="off">
+            <div onclick=""><img src="./assets/imgs/715vwvP5ZEL.png" height="100%"></div>
             <div onclick="mandarMensagem()"><img src="./assets/imgs/send-message-2-2.png" height="100%"></div>
         </div>
     </div>
-    <div id="telaChat" class="menu">
-        <div id="botoes">
-            <button onclick="mudarNome(true)" id="telaChatBotaoMudarNome">mudar nome</button>
+    <div class="menu">
+        <div id="hub" class="formulario">
+            <button onclick="mudarForm(hub, cadastro)">criar conta</button>
+            <button onclick="mudarForm(hub, login)">log-in</button>
         </div>
-    </div>
-    <div id="telaMudarNome" class="menu" style="display: none;">
-        <div>
-            <input type="text" placeholder="novo nome" id="telaMudarNomeNewName" maxlength="16">
+        <div id="cadastro" class="formulario">
+            <b>sign up</b>
+            <input onkeypress="return (event.charCode >= 48 && event.charCode <= 90) || (event.charCode >= 97 && event.charCode <= 122)" type="text" id="cadNickname" placeholder="Nickname" maxlength="16" autocomplete="off">
+            <input onkeypress="return (event.charCode >= 48 && event.charCode <= 90) || (event.charCode >= 97 && event.charCode <= 122)" type="text" id="cadSenha" placeholder="Senha" maxlength="16" autocomplete="off">
+            <span>data de nascimento</span>
+            <div>
+                <input maxlength="2" onkeypress="return event.charCode >= 48 && event.charCode <= 57" id="inDia" style="width: 50px;" placeholder="Dia" autocomplete="off">
+                <input maxlength="2" onkeypress="return event.charCode >= 48 && event.charCode <= 57" id="inMes" style="width: 50px;" placeholder="Mês" autocomplete="off">
+                <input maxlength="4" onkeypress="return event.charCode >= 48 && event.charCode <= 57" id="inAno" style="width: 70px;" placeholder="Ano" autocomplete="off">
+            </div>
+            <br>
+            <button onclick="realizarCadastro()">criar</button>
+            <button onclick="mudarForm(cadastro, hub)">voltar</button>
+        </div>
+        <div id="login" class="formulario">
+            <b>sign in</b>
+            <input onkeypress="return (event.charCode >= 48 && event.charCode <= 90) || (event.charCode >= 97 && event.charCode <= 122)" type="text" id="logNickname" placeholder="Nickname" maxlength="16" autocomplete="off">
+            <input onkeypress="return (event.charCode >= 48 && event.charCode <= 90) || (event.charCode >= 97 && event.charCode <= 122)" type="text" id="logSenha" placeholder="Senha" maxlength="16" autocomplete="off">
+            <br>
+            <button onclick="realizarLogin()">logar</button>
+            <button onclick="mudarForm(login, hub)">voltar</button>
+        </div>
+        <div id="lobby" class="formulario">
+            logado como:
+            <div id="lobbyLogin"></div>
+            <br>
+            <button onclick="realizarLogoff()">deslogar</button>
         </div>
     </div>
 </body>
 </html>
 <script>
-    var ultimoIdProcurado = 0
-    var nomeAtual = ""
+    let ultimoIdProcurado = 0
+    let nomeAtual = ""
 
-    if (localStorage.nome != undefined) {
-        telaMudarNomeNewName.value = localStorage.nome
-    } else {
-        telaChatBotaoMudarNome.innerHTML = "criar nome"
+    function mudarForm(atual, novo) {
+        atual.style.display = "none"
+        novo.style.display = "flex"
     }
 
     telaChatTexto.addEventListener("keydown", function(resposta) {
@@ -46,14 +72,227 @@
         }
     })
 
-    telaMudarNomeNewName.addEventListener("keydown", function(resposta) {
-        if (resposta.key == "Enter") {
+    cadNickname.addEventListener("keydown", function(resposta) {
+        if (resposta.key == "Enter" || (resposta.key == "Tab" && !resposta.shiftKey)) {
             resposta.preventDefault()
-            mudarNome(false)
+            cadSenha.focus()
         }
     })
 
-    //Funções do banco
+    cadSenha.addEventListener("keydown", function(resposta) {
+        if (resposta.key == "Enter" || (resposta.key == "Tab" && !resposta.shiftKey)) {
+            resposta.preventDefault()
+            inDia.focus()
+        }
+    })
+
+    inDia.addEventListener("keydown", function(resposta) {
+        if (resposta.key == "Enter" || (resposta.key == "Tab" && !resposta.shiftKey)) {
+            resposta.preventDefault()
+            inMes.focus()
+        }
+    })
+
+    inMes.addEventListener("keydown", function(resposta) {
+        console.log(resposta)
+        if (resposta.key == "Enter" || (resposta.key == "Tab" && !resposta.shiftKey)) {
+            resposta.preventDefault()
+            inAno.focus()
+        }
+    })
+
+    inAno.addEventListener("keydown", function(resposta) {
+        if (resposta.key == "Enter") {
+            resposta.preventDefault()
+            realizarCadastro()
+        }
+    })
+
+    logNickname.addEventListener("keydown", function(resposta) {
+        if (resposta.key == "Enter" || (resposta.key == "Tab" && !resposta.shiftKey)) {
+            resposta.preventDefault()
+            logSenha.focus()
+        }
+    })
+
+    logSenha.addEventListener("keydown", function(resposta) {
+        if (resposta.key == "Enter") {
+            resposta.preventDefault()
+            realizarLogin()
+        }
+    })
+
+    /*
+    FUNÇÕES DO CADASTRO/LOGIN
+    */
+
+    function realizarCadastro() {
+        let dia = inDia.value
+        let mes = inMes.value
+        let ano = inAno.value
+
+        if (dia.length == 1) {
+            dia = `0${dia}`
+        }
+        if (mes.length == 1) {
+            mes = `0${mes}`
+        }
+        if (ano.length == 1) {
+            ano = `000${ano}`
+        } else if (ano.length == 2) {
+            ano = `00${ano}`
+        } else if (ano.length == 3) {
+            ano = `0${ano}`
+        }
+
+        let dataNasc = `${ano}-${mes}-${dia}`
+
+        if (cadNickname.value == undefined || cadSenha.value == undefined || dia == undefined || mes == undefined || ano == undefined || cadNickname.value == "" || cadSenha.value == "" || dia == "" || mes == "" || ano == "" || cadNickname.value == null || cadSenha.value == null || dia == null || mes == null || ano == null) {
+            alert('insira dados válidos em todos os campos')
+            return
+        }
+
+        if (dia <= 0 || mes <= 0 || ano <= 0 || dia > 31 || mes > 12 || ano > (new Date().getFullYear())) {
+            alert("Data inválida")
+            return
+        }
+
+        fetch("/contas/realizarCadastro", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                nickname: cadNickname.value,
+                senha: cadSenha.value,
+                dataNasc: new Date(`${dataNasc}T03:24:00`).toJSON().slice(0, 10)
+            })
+        })
+        .then(function (response) {
+            if (response.ok) {
+                response.json().then(function (resposta) {
+                    cadNickname.value = ""
+                    cadSenha.value = ""
+                    inDia.value = ""
+                    inMes.value = ""
+                    inAno.value = ""
+                    if (resposta != null) {
+                        alert("Cadastro concluído com sucesso")
+                    }
+                })
+            }
+        })
+    }
+
+    function realizarLogin() {
+        if (logNickname.value == undefined || logSenha.value == undefined || logNickname.value == "" || logSenha.value == "" || logNickname.value == null || logSenha.value == null) {
+            alert('insira dados válidos em todos os campos')
+            return
+        }
+
+        fetch(`/contas/validarLogin/${logNickname.value}/${logSenha.value}`, {
+            method: "GET"
+        })
+        .then(function (response) {
+            if (response.ok && response.statusText == "OK") {
+                response.json().then(function (resposta) {
+                    let retorno = resposta[0]
+
+                    localStorage.idUsuario = retorno.idUsuario
+                    localStorage.nickname = retorno.nickname
+                    localStorage.senha = retorno.senha
+                    localStorage.dataNasc = retorno.dataNasc
+                })
+
+                alert("Login validado!")
+
+                window.location.reload()
+            } else {
+                localStorage.removeItem("idUsuario")
+                localStorage.removeItem("nickname")
+                localStorage.removeItem("senha")
+                localStorage.removeItem("dataNasc")
+
+                alert("Login falhou!")
+            }
+        })
+    }
+
+    function realizarLogoff() {
+        localStorage.removeItem("idUsuario")
+        localStorage.removeItem("nickname")
+        localStorage.removeItem("senha")
+        localStorage.removeItem("dataNasc")
+
+        alert("Sessão descontinuada com sucesso")
+
+        window.location.reload()
+    }
+
+    if (localStorage.nickname == undefined || localStorage.senha == undefined) {
+        hub.style.display = "flex"
+    } else {
+        fetch(`/contas/validarLogin/${localStorage.nickname}/${localStorage.senha}`, {
+            method: "GET"
+        })
+        .then(function (response) {
+            if (response.ok && response.statusText == "OK") {
+                response.json().then(function (resposta) {
+                    let retorno = resposta[0]
+    
+                    localStorage.idUsuario = retorno.idUsuario
+                    localStorage.nickname = retorno.nickname
+                    localStorage.senha = retorno.senha
+                    localStorage.dataNasc = retorno.dataNasc
+
+                    lobbyLogin.innerHTML =
+                    `
+                    idUsuario: ${retorno.idUsuario}
+                    <br>
+                    Nickname: ${retorno.nickname}
+                    <br>
+                    senha: ${retorno.senha}
+                    <br>
+                    dataNasc: ${retorno.dataNasc}
+                    `
+
+                    lobby.style.display = "flex"
+                    chat.style.display = "block"
+                })
+            } else {
+                localStorage.removeItem("idUsuario")
+                localStorage.removeItem("nickname")
+                localStorage.removeItem("senha")
+                localStorage.removeItem("dataNasc")
+    
+                alert("Sua sessão foi desconectada. Contate o administrador para mais informações")
+
+                hub.style.display = "flex"
+            }
+        })
+    }
+
+    /*
+    FUNÇÕES DO CHAT
+    */
+
+    function abrirChat(abrir) {
+        if (abrir) {
+            chat.style.height = "35vh"
+            caixote.style.height = "80%"
+            document.querySelectorAll('.areaInput').forEach(it => 
+                it.style.height = "10%"
+            )
+            chatBotaoAbrirChat.setAttribute("onclick","abrirChat(false)")
+        } else {
+            chat.style.height = "7vh"
+            caixote.style.height = "0"
+            document.querySelectorAll('.areaInput').forEach(it => 
+                it.style.height = "50%"
+            )
+            chatBotaoAbrirChat.setAttribute("onclick","abrirChat(true)")
+        }
+    }
 
     fetch("/chat/buscarUltimoId", {
         method: "GET"
@@ -62,8 +301,9 @@
         if (response.ok) {
             response.json().then(function (resposta) {
                 ultimoIdProcurado = resposta[0].id
-                setInterval(buscarNovasMensagens, 500)
-                setInterval(deletarMensagensAntigas, 30000)
+                if (ultimoIdProcurado == null) {ultimoIdProcurado = 0}
+                // setInterval(buscarNovasMensagens, 500)
+                // setInterval(deletarMensagensAntigas, 30000)
             })
         }
     })
@@ -104,31 +344,8 @@
         })
     }
 
-    function mudarNome(solicitando) {
-        if (solicitando) {
-            telaChat.style.display = 'none'
-            telaMudarNome.style.display = 'flex'
-        } else {
-            if (telaMudarNomeNewName.value == '') {
-                alert('coloca um nome rapaz')
-                return
-            }
-
-            localStorage.nome = trocarCaractere(trocarCaractere(trocarCaractere(telaMudarNomeNewName.value, "  ", ""), "<", ""), ">", "").trim()
-            telaChatBotaoMudarNome.innerHTML = "mudar nome"
-            telaMudarNome.style.display = 'none'
-            telaChat.style.display = 'flex'
-        }
-    }
-
     function mandarMensagem() {
-        if (localStorage.nome == undefined) {
-            alert('defina um nome de perfil e tente novamente')
-            mudarNome(true)
-            return
-        }
         if (telaChatTexto.value == "") {
-            alert('manda algo vacilão')
             return
         }
 

@@ -1,26 +1,40 @@
-create database testes;
-use testes;
+create database chatio;
+use chatio;
 
-/*
-drop database testes;
-drop table numeros;
-drop table mensagem;
-*/
+#drop database chatio;
+#drop table usuario;
+#drop table userStatus;
+#drop table userInventory;
+#drop table userMensagem;
 
-create table numeros (
-id int primary key auto_increment,
-rng decimal(5,3),
-dia char(10),
-hora char(8)
+create table usuario (
+idUsuario int primary key auto_increment,
+nickname varchar(16) not null unique,
+senha varchar(16) not null,
+dataNasc date
 );
 
-create table mensagem (
+create table userStatus (
+ultimoUpdate datetime,
+x int,
+y int
+);
+
+create table userInventory (
+idItem int primary key auto_increment,
+nomeItem varchar(45),
+tipoItem varchar(45),
+statusItem varchar(45)
+);
+
+create table userMensagem (
 idMensagem int primary key auto_increment,
-dono varchar(16),
-texto varchar(512)
+texto varchar(512),
+fkUsuario int,
+foreign key (fkUsuario) references usuario(idUsuario)
 );
 
-select * from numeros;
-select * from mensagem;
-select * from mensagem where idMensagem > 0;
-select max(idMensagem) from mensagem;
+select * from usuario;
+select * from userStatus;
+select * from userInventory;
+select * from userMensagem;

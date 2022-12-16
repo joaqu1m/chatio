@@ -16,6 +16,7 @@ app.use(express.static(path.join(__dirname, "public")))
 app.use(cors())
 
 app.use("/chat", require("./src/queries/chat"))
+app.use("/contas", require("./src/queries/contas"))
 
 console.log(`> rotas definidas`)
 
