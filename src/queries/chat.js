@@ -5,7 +5,7 @@ var database = require("./../database/conexao")
 router.post("/mandarMensagem", function (req, res) {
     var instrucao =
     `
-    insert into userMensagem (texto) values ('${req.body.texto}');
+    insert into userMensagem (texto, fkUsuario) values ('${req.body.texto}', '${req.body.fkUsuario}');
     `
 
     console.log("Executando a instrução SQL: \n" + instrucao)
@@ -53,7 +53,7 @@ router.get("/buscarNovasMensagens/:valores", function (req, res) {
 
     var instrucao =
     `
-    select * from userMensagem where idMensagem > ${req.params.valores};
+    select idMensagem, nickname, texto from userMensagem join usuario on fkUsuario = idUsuario where idMensagem > ${req.params.valores};
     `
     console.log("Executando a instrução SQL: \n" + instrucao)
     database.executar(instrucao)
