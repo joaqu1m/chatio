@@ -5,7 +5,7 @@ var mySqlConfig = {
     host: "localhost",
     database: "chatio",
     user: "root",
-    password: "#Gf50069451842",
+    password: "urubu100",
 }
 
 var sqlServerConfig = {

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./assets/css/styles.css">
     <title>Document</title>
     <style>
         body {
@@ -15,32 +16,101 @@
             width: 650px;
             height: 650px;
             background-color: rgb(94, 206, 94);
-            border: 2px solid rgb(0, 0, 0);
         }
         #char {
             width: 50px;
             height: 50px;
-            background-color: white;
+            background-color: rgb(224, 224, 224);
             position: absolute;
         }
     </style>
 </head>
 <body>
+    <div id="chat">
+        <div class="areaInput" style="background-color: rgb(223, 223, 223); border-top-left-radius: 20px;">
+            <div id="chatBotaoAbrirChat" onclick="abrirChat(false)" style="margin-left: 93%; border: 0;"><img id="chatBotaoAbrirChatImagem" src="./assets/imgs/Minus-Silhouette-Transparent-Image.png" height="100%"></div>
+        </div>
+        <div id="caixote"></div>
+        <div class="areaInput">
+            <input type="text" id="telaChatTexto" placeholder="Digite sua mensagem aqui..." maxlength="512" autocomplete="off">
+            <div onclick=""><img src="./assets/imgs/715vwvP5ZEL.png" height="100%"></div>
+            <div onclick="mandarMensagem()"><img src="./assets/imgs/send-message-2-2.png" height="100%"></div>
+        </div>
+    </div>
     <div id="gameStart">
         <div id="char"></div>
     </div>
 </body>
 </html>
+<script type="text/javascript" src="./assets/js/utilities.js"></script>
+<script type="text/javascript" src="./assets/js/chat.js"></script>
 <script>
-  gameStart.onclick = function clickEvent(e) {
-    var rect = e.target.getBoundingClientRect()
-    var x = e.clientX - rect.left
-    var y = e.clientY - rect.top
-    console.log(`Left ${x} Top ${y}`)
-    char.style.marginLeft = `${x - 25}px`
-    char.style.marginTop = `${y - 25}px`
-  }
-  char.onclick = function clickEvent(e) {
-    e.stopPropagation()
-  }
+    function checarOutOfBounds(orientacao, medida) {
+        if (orientacao >= gameStart[`offset${medida}`] - (char[`offset${medida}`] / 2)) {
+            return gameStart[`offset${medida}`] - 50
+        } else {
+            return orientacao < char[`offset${medida}`] / 2 ? 0 : orientacao - 25
+        }
+    }
+
+    let atual = {x: 0, y: 0}
+
+    gameStart.onclick = function clickEvent(e) {
+        let rect = e.target.getBoundingClientRect()
+        let x = e.clientX - rect.left
+        let y = e.clientY - rect.top
+
+
+        x = checarOutOfBounds(x, "Width")
+        y = checarOutOfBounds(y, "Height")
+
+        //Math.floor(Math.random() * (max - min +1)) + min
+        char.style.transition = `${((((y >= atual.y ? y - atual.y : atual.y - y)**2) + ((x >= atual.x ? x - atual.x : atual.x - x)**2))**1/2) / 100000}s`
+        char.style.marginLeft = `${x}px`
+        char.style.marginTop = `${y}px`
+        atual = {x: x, y: y}
+    }
+
+    char.onclick = function clickEvent(e) {
+        e.stopPropagation()
+    }
+
+    //document.documentElement.requestFullscreen()
+    
+    // Validação do login
+
+    if (localStorage.nickname == undefined || localStorage.senha == undefined) {
+        window.location.href = "./index.html"
+    } else {
+        fetch(`/contas/validarLogin/${localStorage.nickname}/${localStorage.senha}`, {
+            method: "GET"
+        })
+        .then(function (response) {
+            if (response.ok && response.statusText == "OK") {
+                response.json().then(function (resposta) {
+                    let retorno = resposta[0]
+    
+                    localStorage.idUsuario = retorno.idUsuario
+                    localStorage.nickname = retorno.nickname
+                    localStorage.senha = retorno.senha
+                    localStorage.dataNasc = retorno.dataNasc
+
+                    //gameStart.style.display = "block"
+                    chat.style.display = "block"
+                })
+            } else {
+                localStorage.removeItem("idUsuario")
+                localStorage.removeItem("nickname")
+                localStorage.removeItem("senha")
+                localStorage.removeItem("dataNasc")
+    
+                alert("Sua sessão foi desconectada. Contate o administrador para mais informações")
+
+                window.location.href = "./index.html"
+            }
+        })
+    }
+
+    gameStart.addEventListener('contextmenu', event => event.preventDefault())
+    char.addEventListener('contextmenu', event => event.preventDefault())
 </script>
