@@ -36,7 +36,7 @@ fetch("/chat/buscarUltimoId", {
         response.json().then(function (resposta) {
             ultimoIdProcurado = resposta[0].id
             if (ultimoIdProcurado == null) {ultimoIdProcurado = 0}
-            setInterval(buscarNovasMensagens, 250)
+            setInterval(buscarNovasMensagens, 350)
             setInterval(deletarMensagensAntigas, 30000)
         })
     }

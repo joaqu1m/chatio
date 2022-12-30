@@ -11,16 +11,18 @@
             margin: 0;
             display: flex;
             justify-content: center;
+            overflow: hidden;
         }
         #gameStart {
             width: 650px;
             height: 650px;
-            background-color: rgb(94, 206, 94);
+            background-color: rgb(255, 220, 239);
         }
         #char {
             width: 50px;
             height: 50px;
-            background-color: rgb(224, 224, 224);
+            background-image: linear-gradient(red, yellow);
+            border-radius: 100%;
             position: absolute;
         }
     </style>
@@ -44,39 +46,61 @@
 </html>
 <script type="text/javascript" src="./assets/js/utilities.js"></script>
 <script type="text/javascript" src="./assets/js/chat.js"></script>
+<script type="text/javascript" src="./assets/js/personagensOnline.js"></script>
 <script>
-    function checarOutOfBounds(orientacao, medida) {
-        if (orientacao >= gameStart[`offset${medida}`] - (char[`offset${medida}`] / 2)) {
-            return gameStart[`offset${medida}`] - 50
-        } else {
-            return orientacao < char[`offset${medida}`] / 2 ? 0 : orientacao - 25
-        }
-    }
+    // Variáveis usadas apenas no personagem local. Define onde você começa no grande plano. Usada apenas na primeira vez que você entra no mundo.
+    let atual = {x: Math.floor(Math.random() * (gameStart.offsetWidth - char.offsetWidth + 1)), y: Math.floor(Math.random() * (gameStart.offsetHeight - char.offsetHeight + 1))}
+    char.style.marginLeft = `${atual.x}px`
+    char.style.marginTop = `${atual.y}px`
 
-    let atual = {x: 0, y: 0}
+    //após o carregamento do perfil pelo banco de dados
+
+    players.push({
+        id: "char", // a ideia é que os 4 proximos valores venham do banco de dados. por enqunto temos valores mockados
+        nome: "depois veremos isso",
+        coordsAtuais: {x: atual.x, y: atual.y},
+        coordsFuturas: {x: atual.x, y: atual.y},
+        deg: 90,
+        emMovimento: false,
+        moveSpeed: 250, // 250 pixels por segundo
+    })
 
     gameStart.onclick = function clickEvent(e) {
         let rect = e.target.getBoundingClientRect()
-        let x = e.clientX - rect.left
-        let y = e.clientY - rect.top
+        let playerAtual = players[0]
 
+        playerAtual.coordsFuturas.x = checarOutOfBounds(e.clientX - rect.left, "Width", char)
+        playerAtual.coordsFuturas.y = checarOutOfBounds(e.clientY - rect.top, "Height", char)
 
-        x = checarOutOfBounds(x, "Width")
-        y = checarOutOfBounds(y, "Height")
+        movimentacao(playerAtual)
+    }
 
-        //Math.floor(Math.random() * (max - min +1)) + min
-        char.style.transition = `${((((y >= atual.y ? y - atual.y : atual.y - y)**2) + ((x >= atual.x ? x - atual.x : atual.x - x)**2))**1/2) / 100000}s`
-        char.style.marginLeft = `${x}px`
-        char.style.marginTop = `${y}px`
-        atual = {x: x, y: y}
+    gameStart.onmousemove = function clickEvent(e) {
+        if (!players[0].emMovimento) {
+            let rect = e.target.getBoundingClientRect()
+
+            olharPara(e.clientX - rect.left, e.clientY - rect.top, players[0])
+        }
+    }
+
+    gameStart.oncontextmenu = function clickEvent(e) {
+        e.preventDefault()
     }
 
     char.onclick = function clickEvent(e) {
         e.stopPropagation()
     }
 
+    char.onmousemove = function clickEvent(e) {
+        e.stopPropagation()
+    }
+
+    char.oncontextmenu = function clickEvent(e) {
+        e.preventDefault()
+    }
+
     //document.documentElement.requestFullscreen()
-    
+
     // Validação do login
 
     if (localStorage.nickname == undefined || localStorage.senha == undefined) {
@@ -111,6 +135,5 @@
         })
     }
 
-    gameStart.addEventListener('contextmenu', event => event.preventDefault())
     char.addEventListener('contextmenu', event => event.preventDefault())
 </script>
