@@ -26,26 +26,32 @@ function moverChar(x, y, tempo, character) {
 
 function olharPara(x, y, p) {
     p.deg = Math.atan2(p.coordsAtuais.y + (window[p.id].offsetHeight / 2) - y, p.coordsAtuais.x + (window[p.id].offsetWidth / 2) - x) * 180 / Math.PI
-    console.log(p)
     window[p.id].style.transform = `rotate(${p.deg - 90}deg)`
 }
 
+function pararChar(p) {
+    clearTimeout(timeoutAtual)
+    p.emMovimento = false
+    p.coordsAtuais = {x: pegarPosicaoAtual("Left", window[p.id]), y: pegarPosicaoAtual("Top", window[p.id])}
+    moverChar(p.coordsAtuais.x, p.coordsAtuais.y, 0, window[p.id])
+}
+
+let timeoutAtual = 0
+
 function movimentacao(p) {
     if (p.emMovimento) {
-        p.coordsAtuais = {x: pegarPosicaoAtual("Left", window[p.id]), y: pegarPosicaoAtual("Top", window[p.id])}
-        moverChar(p.coordsAtuais.x, p.coordsAtuais.y, 0, window[p.id])
+        pararChar(p)
     }
 
     p.emMovimento = true
 
     olharPara(p.coordsFuturas.x, p.coordsFuturas.y, p)
 
-    let tempo = ((((p.coordsFuturas.y - p.coordsAtuais.y)**2) + ((p.coordsFuturas.x - p.coordsAtuais.x)**2))**(1/2)) / p.moveSpeed
-    clearTimeout(desligarMovimento)
-    var desligarMovimento = setTimeout(() => {
-        console.log("wtf")
+    const tempo = ((((p.coordsFuturas.y - p.coordsAtuais.y)**2) + ((p.coordsFuturas.x - p.coordsAtuais.x)**2))**(1/2)) / p.moveSpeed
+    const desligarMovimento = setTimeout(() => {
         p.emMovimento = false
     }, tempo*1000)
+    timeoutAtual = desligarMovimento
 
     moverChar(p.coordsFuturas.x, p.coordsFuturas.y, tempo, window[p.id])
 
